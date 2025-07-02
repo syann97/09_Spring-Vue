@@ -5,9 +5,10 @@ import axios from 'axios';
 const initState = {
   token: '',
   user: {
-    username: '', // 사용자 ID
-    email: '', // Email
+    username: '',
+    email: '',
     roles: [],
+    avatar: '', // ✅ 아바타 경로
   },
 };
 
@@ -49,6 +50,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  // 프로필 변경 후 로컬 상태 동기화 액션
+  const changeProfile = (member) => {
+    state.value.user.email = member.email; // 이메일 업데이트
+    localStorage.setItem('auth', JSON.stringify(state.value)); // 로컬스토리지 동기화
+  };
+
   load();
 
   return {
@@ -56,6 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
     username,
     email,
     isLogin,
+    changeProfile,
     login,
     logout,
     getToken,
