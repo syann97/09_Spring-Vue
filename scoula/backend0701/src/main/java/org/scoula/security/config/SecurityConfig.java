@@ -109,7 +109,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(
-                "/assets/**", "/*", "/api/member/**",
+                "/assets/**", "/*",
+//                "/api/member/**",
                 // Swagger 관련 URL은 보안에서 제외
                 "/swagger-ui.html", "/webjars/**",
                 "/swagger-resources/**", "/v2/api-docs"
@@ -145,10 +146,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 3. 경로별 접근 권한 설정
         http.authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.POST,"/api/member").authenticated()
-                .antMatchers(HttpMethod.PUT,"/api/member","/api/member/*/changepassword").authenticated()
-                // 현재는 모든 접근 허용 (개발 단계)
-                .anyRequest().permitAll();
+                // 🌐 회원 관련 공개 API (인증 불필요)
+                .antMatchers(HttpMethod.GET, "/api/member/checkusername/**").permitAll()     // ID 중복 체크
+                .antMatchers(HttpMethod.POST, "/api/member").permitAll()                    // 회원가입
+                .antMatchers(HttpMethod.GET, "/api/member/*/avatar").permitAll()            // 아바타 이미지
+
+                // 🔒 회원 관련 인증 필요 API
+                .antMatchers(HttpMethod.PUT, "/api/member/**").authenticated() // 회원 정보 수정, 비밀번호 변경
+
+                .anyRequest().permitAll(); // 나머지 허용
+
 
         http.httpBasic().disable()     // 기본 HTTP 인증 비활성화
                 .csrf().disable()          // CSRF 비활성화

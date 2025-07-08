@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChangePasswordDTO {
     String username;    // 사용자 ID
-    String oldPassword; // 이전 비밀번호
-    String newPassword; // 새 비밀번호
+    String oldPassword; // 이전 비밀번호 (검증용)
+    String newPassword; // 새 비밀번호 (암호화 대상)
 }

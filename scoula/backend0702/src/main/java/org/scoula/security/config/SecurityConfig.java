@@ -109,7 +109,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(
-                "/assets/**", "/*", "/api/member/**",
+                "/assets/**", "/*",
+//                "/api/member/**",
                 // Swagger 관련 URL은 보안에서 제외
                 "/swagger-ui.html", "/webjars/**",
                 "/swagger-resources/**", "/v2/api-docs"
@@ -119,12 +120,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * UTF-8 문자 인코딩 필터
      */
-    public CharacterEncodingFilter encodingFilter() {
-        CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
-        encodingFilter.setEncoding("UTF-8");
-        encodingFilter.setForceEncoding(true);
-        return encodingFilter;
-    }
+//    public CharacterEncodingFilter encodingFilter() {
+//        CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
+//        encodingFilter.setEncoding("UTF-8");
+//        encodingFilter.setForceEncoding(true);
+//        return encodingFilter;
+//    }
 
     /**
      * HTTP 보안 설정 - 메인 보안 구성
@@ -132,7 +133,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         // 1. 필터 체인 설정 (순서 중요!)
-        http.addFilterBefore(encodingFilter(), CsrfFilter.class)                                    // UTF-8 인코딩
+        http
+//                .addFilterBefore(encodingFilter(), CsrfFilter.class)                                    // UTF-8 인코딩
                 .addFilterBefore(authenticationErrorFilter, UsernamePasswordAuthenticationFilter.class) // 인증 에러 처리
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)   // JWT 토큰 인증
                 .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // 로그인 처리
@@ -145,13 +147,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 3. 경로별 접근 권한 설정
         http.authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.POST,"/api/member").authenticated()
-                .antMatchers(HttpMethod.PUT,"/api/member","/api/member/*/changepassword").authenticated()
-                // POST, PUT, DELETE 요청 : 인증 요구
-                .antMatchers(HttpMethod.POST, "/api/board/**").authenticated()
-                .antMatchers(HttpMethod.PUT, "/api/board/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/board/**").authenticated()
-                .anyRequest().permitAll();
+
+                // 🌐 회원 관련 공개 API (인증 불필요)
+                .antMatchers(HttpMethod.GET, "/api/member/checkusername/**").permitAll()     // ID 중복 체크
+                .antMatchers(HttpMethod.POST, "/api/member").permitAll()                    // 회원가입
+                .antMatchers(HttpMethod.GET, "/api/member/*/avatar").permitAll()            // 아바타 이미지
+
+                // 🔒 회원 관련 인증 필요 API
+                .antMatchers(HttpMethod.PUT, "/api/member/**").authenticated() // 회원 정보 수정, 비밀번호 변경
+
+                // 게시판 관련 인증 요구 경로
+                .antMatchers(HttpMethod.POST, "/api/board/**").authenticated() // 쓰기
+                .antMatchers(HttpMethod.PUT, "/api/board/**").authenticated()  // 수정
+                .antMatchers(HttpMethod.DELETE, "/api/board/**").authenticated() // 삭제
+                .anyRequest().permitAll(); // 나머지 허용
+
 
         http.httpBasic().disable()     // 기본 HTTP 인증 비활성화
                 .csrf().disable()          // CSRF 비활성화

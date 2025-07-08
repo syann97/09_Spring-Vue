@@ -47,7 +47,7 @@ export default {
     return data;
   },
 
-  asyncchangePassword(formData) {
+  async changePassword(formData) {
     const { data } = awaitapi.put(
       `${BASE_URL}/${formData.username}/changepassword`,
       formData
