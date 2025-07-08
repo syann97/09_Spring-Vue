@@ -31,6 +31,6 @@ export default defineConfig({
   // 빌드 설정
   build: {
     outDir:
-      'C:/Users/shall/Desktop/ITYL/kb_fullstack/09_Spring+Vue/scoula/backend0702/src/main/webapp/resources',
+      'C:/Users/shall/Desktop/ITYL/kb_fullstack/09_Spring+Vue/scoula/backend0703/src/main/webapp/resources',
   },
 });
